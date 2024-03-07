@@ -7,6 +7,7 @@ access them in your application through Azure App Configuration.
 
 ## Prerequisites
 * An Azure subscription; if you don't already have an Azure subscription, you can activate your [MSDN subscriber benefits](https://azure.microsoft.com/en-us/pricing/member-offers/msdn-benefits-details/) or sign up for a [free account](https://azure.microsoft.com/en-us/free/).
+* Azure CLI. If you don't have Azure CLI, install the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli).
 * Java 17 or later. If you don't have Java, install the [Java Development Kit (JDK)](https://adoptopenjdk.net/).
 * Maven 3.0 and above. If you don't have Maven, install [Maven](https://maven.apache.org/download.cgi).
 
@@ -29,4 +30,25 @@ access them in your application through Azure App Configuration.
 * Open a browser and navigate to `http://localhost:8080/appConfigs` to see the app configuration value.
 * Open a browser and navigate to `http://localhost:8080/secretAndAppConfigs` to see the secret and app configuration value.
 
+
+## Create a Resource Group
+Create a resource group with the `az group create` command. An Azure resource group is a logical container into which 
+Azure resources are deployed and managed.
+
+```bash
+az group create --name <resource-group-name> --location <location>
+```
+A resource group belongs to a single location. To see all the locations supported in your current subscription, 
+run the az account list-locations command:
+```bash
+az account list-locations
+```
+
+## Create an Azure Key Vault
+Create an Azure Key Vault with the `az keyvault create` command. An Azure Key Vault is a cloud service that works as a 
+secure secrets store. You can use Key Vault to protect secrets such as API keys, passwords, and certificates.
+
+```bash
+az keyvault create --name <key-vault-name> --resource-group <resource-group-name> --location <location>
+```
 
