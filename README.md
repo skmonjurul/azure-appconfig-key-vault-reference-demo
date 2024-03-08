@@ -6,7 +6,7 @@ access them in your application through Azure App Configuration.
 # In this article
 * [prerequisites](#prerequisites)
 * [Quickstart](#quickstart)
-* How to run java spring boot application using key vault reference in your local machine.
+* [How to run java spring boot application using key vault reference in your local machine.](#how-to-run-java-spring-boot-application-using-key-vault-reference-in-your-local-machine)
 * How to run java spring boot application using key vault reference in Azure AKS using AppConfigurationProvider.
 * How to run java spring boot application using key vault reference in Azure AKS using WorkloadIdentity.
 
@@ -36,8 +36,26 @@ access them in your application through Azure App Configuration.
 * Open a browser and navigate to `http://localhost:8080/appConfigs` to see the app configuration value.
 * Open a browser and navigate to `http://localhost:8080/secretAndAppConfigs` to see the secret and app configuration value.
 
+## How to run java spring boot application using key vault reference in your local machine.
 
-## Create a Resource Group
+Please note: before running the application remove the env variables `APP_SECRET` and `APP_CONFIG` from your local machine.
+* [create a resource group](#create-a-resource-group)
+* [create an Azure Key Vault](#create-an-azure-key-vault)
+* [get the Object id of yourself](#get-the-object-id-of-yourself)
+* [grant access "Key Vault Administrator" role to the Key Vault](#grant-access-key-vault-administrator-role-to-the-key-vault)
+* [create a secret in the Key Vault](#create-a-secret-in-the-key-vault)
+* [create an Azure App Configuration](#create-an-azure-app-configuration)
+* [create a key value in the App Configuration](#create-a-key-value-in-the-app-configuration)
+* [create a key vault reference in the App Configuration](#create-a-key-vault-reference-in-the-app-configuration)
+* [create a Service Principal](#create-a-service-principal)
+* [grant access "App Configuration Data Reader" role to the Service Principal](#grant-access-app-configuration-data-reader-role-to-the-service-principal)
+* [build the project using Maven](#build-the-project-using-maven)
+* [run the application](#run-the-application)
+
+
+
+
+### Create a Resource Group
 Create a resource group with the `az group create` command. An Azure resource group is a logical container into which 
 Azure resources are deployed and managed.
 
@@ -50,7 +68,7 @@ run the az account list-locations command:
 az account list-locations
 ```
 
-## Create an Azure Key Vault
+### Create an Azure Key Vault
 Create an Azure Key Vault with the `az keyvault create` command. An Azure Key Vault is a cloud service that works as a 
 secure secrets store. You can use Key Vault to protect secrets such as API keys, passwords, and certificates.
 
@@ -58,7 +76,7 @@ secure secrets store. You can use Key Vault to protect secrets such as API keys,
 az keyvault create --name <key-vault-name> --resource-group <resource-group-name> --location <location> --enable-rbac-authorization
 ```
 
-## Get the Object id of yourself
+### Get the Object id of yourself
 Get the object id of the user with the `az ad user list` command. You can use the object id to grant access to the Key Vault.
 
 ```bash
@@ -71,7 +89,7 @@ az ad user list --query "[].id" -o tsv
 ```
 
 
-## Grant access "Key Vault Administrator" role to the Key Vault
+### Grant access "Key Vault Administrator" role to the Key Vault
 Grant access to the Key Vault with the `az role assignment create` command. You can grant access to a user, group,
 or service principal at a particular scope.
 
@@ -84,7 +102,7 @@ az keyvault show --name <key-vault-name> --query "id" -o tsv
 az role assignment create --role "Key Vault Administrator" --assignee <user-email>/<object_id> --scope <key-vault-id>
 ```
 
-## Create a secret in the Key Vault
+### Create a secret in the Key Vault
 Create a secret in the Key Vault with the `az keyvault secret set` command. You can use the secret to store sensitive
 information such as passwords, connection strings, and other secrets.
 
@@ -92,31 +110,78 @@ information such as passwords, connection strings, and other secrets.
 az keyvault secret set --vault-name <key-vault-name> --name <secret-name> --value <secret-value>
 ```
 
-
-## Delete key vault
-Delete the key vault with the `az keyvault delete` command.
+### Create an Azure App Configuration
+Create an Azure App Configuration with the `az appconfig create` command. Azure App Configuration is a service that
+enables you to centralize your application settings and feature flags.
 
 ```bash
-az keyvault delete --name <key-vault-name> --resource-group <resource-group-name>
+az appconfig create --name <app-config-name> --resource-group <resource-group-name> --location <location> --sku Free
 ```
 
-## Recover soft-deleted key-vault
-Recover the soft-deleted key vault with the `az keyvault recover` command.
-
+Set the environment variable `APP_CONFIG_ENDPOINT` on your local machine.
 ```bash
-az keyvault recover --subscription <subscription-id> -n <key-vault-name> 
+export APP_CONFIG_ENDPOINT="<app-config-endpoint>"
 ```
 
-## Purge soft-deleted key vault (WARNING! THIS OPERATION WILL PERMANENTLY DELETE YOUR KEY VAULT)
-Purge the soft-deleted key vault with the `az keyvault purge` command.
+### Create a key value in the App Configuration
+Create a key value in the App Configuration with the `az appconfig kv set` command.
 
 ```bash
-az keyvault purge --subscription <subscription-id> -n <keyvault-name> 
+az appconfig kv set --name <app-config-name> --key <key> --value <value>
 ```
 
-## Enable purge-protection on key-vault
-Enable purge-protection on the key vault with the `az keyvault update` command.
+### Create a key vault reference in the App Configuration
+Create a key vault reference in the App Configuration with the `az appconfig kv set` command.
 
 ```bash
-az keyvault update --subscription <subscription-id> -g <resource-group> -n <keyvault-name> --enable-purge-protection true
+az appconfig kv set-keyvault --name <app-config-name> --key <key> --secret-identifier <secret-identifier>
+```
+you can get the secret-identifier from the Azure Key Vault using below command.
+```bash
+az keyvault secret list --vault-name <keyvault-name> --query "[].id" -o tsv
+```
+
+### Create a Service Principal
+Create a service principal with the `az ad sp create-for-rbac` command. You can use the service principal to authenticate
+and authorize users and services to access your resources.
+
+```bash
+az ad sp create-for-rbac --name <service-principal-name>  --role "Key Vault Secrets User" --scopes <key-vault-id>
+```
+
+Take a note `appId` from the output of the above command. And set an env variable `AZURE_CLIENT_ID` on your local machine.
+```bash
+export AZURE_CLIENT_ID="<appId>"
+```
+
+Take a note `tenant` from the output of the above command. And set an env variable `AZURE_TENANT_ID` on your local machine.
+```bash
+export AZURE_TENANT_ID="<tenant>"
+```
+
+Take a note `password` from the output of the above command. And set an env variable `AZURE_CLIENT_SECRET` on your local machine.
+Please note that you will not be able to retrieve the password again, so make sure to save it in a secure location.
+```bash
+export AZURE_CLIENT_SECRET="<password>"
+```
+
+### Grant access "App Configuration Data Reader" role to the Service Principal
+Grant access to the App Configuration with the `az role assignment create` command. You can grant access to a user, group,
+or service principal at a particular scope.
+```bash
+az role assignment create --role "App Configuration Data Reader" --assignee <service-principal-appId> --scope <app-config-id>
+```
+
+### Build the project using Maven
+Build the project using Maven with the `mvn clean package` command.
+
+```bash
+mvn clean package
+```
+
+### Run the application
+Run the application using the following command:
+
+```bash
+java -jar target/key-vault-reference-demo-0.0.1-SNAPSHOT.jar
 ```
