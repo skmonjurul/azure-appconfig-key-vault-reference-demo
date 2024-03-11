@@ -172,6 +172,44 @@ or service principal at a particular scope.
 az role assignment create --role "App Configuration Data Reader" --assignee <service-principal-appId> --scope <app-config-id>
 ```
 
+### Create container registry
+Create a container registry with the `az acr create` command. An Azure Container Registry is a managed Docker registry
+service based on the open-source Docker Registry 2.0. You can use it to store and manage your container images.
+
+```bash
+az acr create --resource-group <resource-group-name> --name <container-registry-name> --sku Basic
+```
+If LocationNotAvailableForResourceType error occurs, you can use the `az acr check-name --name <location>` command to check the availability of the name.
+Then you can use the `az acr create --resource-group <resource-group-name> --name <container-registry-name> --sku Basic --location <location>` command to create the container registry.
+
+```bash
+az acr create --resource-group <resource-group-name> --name <container-registry-name> --sku Basic --location <location>
+```
+
+**_Please note that the container registry name must be unique within Azure, and contain 5-50 alphanumeric characters only 
+and cannot contain special characters. And also registry name must use only lowercase letters._**
+
+### Login to the container registry
+Login to the container registry with the `az acr login` command. You can use the container registry to store and manage your container images.
+
+```bash
+az acr login --name <container-registry-name>
+```
+
+### Create a Docker image
+Create a Docker image with the `docker build` command. You can use the Docker image to run your application in a container.
+
+```bash
+docker build -t <container-registry-name>.azurecr.io/<image-name>:<tag> .
+```
+
+### Push the Docker image
+Push the Docker image to the container registry with the `docker push` command. You can use the container registry to store and manage your container images.
+
+```bash
+docker push <container-registry-name>.azurecr.io/<image-name>:<tag>
+```
+
 ### Build the project using Maven
 Build the project using Maven with the `mvn clean package` command.
 
