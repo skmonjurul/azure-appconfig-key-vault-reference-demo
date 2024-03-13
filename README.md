@@ -7,8 +7,8 @@ access them in your application through Azure App Configuration.
 * [prerequisites](#prerequisites)
 * [Quickstart](#quickstart)
 * [How to run java spring boot application using key vault reference in your local machine.](#how-to-run-java-spring-boot-application-using-key-vault-reference-in-your-local-machine)
-* How to run java spring boot application using key vault reference in Azure AKS using AppConfigurationProvider.
-* How to run java spring boot application using key vault reference in Azure AKS using WorkloadIdentity.
+* [How to run java spring boot application using key vault reference in Azure AKS using AppConfigurationProvider.](#how-to-run-java-spring-boot-application-using-key-vault-reference-in-azure-aks-using-appconfigurationprovider)
+* [How to run java spring boot application using key vault reference in Azure AKS using WorkloadIdentity.](#how-to-run-java-spring-boot-application-using-key-vault-reference-in-azure-aks-using-workloadidentity)
 
 ## Prerequisites
 * An Azure subscription; if you don't already have an Azure subscription, you can activate your [MSDN subscriber benefits](https://azure.microsoft.com/en-us/pricing/member-offers/msdn-benefits-details/) or sign up for a [free account](https://azure.microsoft.com/en-us/free/).
@@ -16,6 +16,7 @@ access them in your application through Azure App Configuration.
 * Java 17 or later. If you don't have Java, install the [Java Development Kit (JDK)](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html).
 * Maven 3.0 and above. If you don't have Maven, install [Maven](https://maven.apache.org/download.cgi).
 * Docker. If you don't have Docker, install [Docker](https://www.docker.com/products/docker-desktop).
+* Helm. If you don't have Helm, install [Helm](https://helm.sh/docs/intro/install/).
 
 
 ## Quickstart
@@ -54,6 +55,61 @@ Please note: before running the application remove the env variables `APP_SECRET
 * [run the application](#run-the-application)
 
 
+## How to run java spring boot application using key vault reference in Azure AKS using AppConfigurationProvider
+* [create a resource group](#create-a-resource-group)
+* [create an Azure Key Vault](#create-an-azure-key-vault)
+* [get the Object id of yourself](#get-the-object-id-of-yourself)
+* [grant access "Key Vault Administrator" role to the Key Vault](#grant-access-key-vault-administrator-role-to-the-key-vault)
+* [create a secret in the Key Vault](#create-a-secret-in-the-key-vault)
+* [create an Azure App Configuration](#create-an-azure-app-configuration)
+* [create a key value in the App Configuration](#create-a-key-value-in-the-app-configuration)
+* [create a key vault reference in the App Configuration](#create-a-key-vault-reference-in-the-app-configuration)
+* [create a Service Principal](#create-a-service-principal)
+* [grant access "App Configuration Data Reader" role to the Service Principal](#grant-access-app-configuration-data-reader-role-to-the-service-principal)
+* [create container registry](#create-container-registry)
+* [login to the container registry](#login-to-the-container-registry)
+* [build the project using Maven](#build-the-project-using-maven)
+* [create a Docker image](#create-a-docker-image)
+* [push the Docker image](#push-the-docker-image)
+* [create AKS cluster](#create-aks-cluster)
+* [get access credentials for your AKS cluster](#get-access-credentials-for-your-aks-cluster)
+* [create a Managed Identity](#create-a-managed-identity)
+* [grant access "Key Vault Secrets User" role to the Managed Identity](#grant-access-key-vault-secrets-user-role-to-the-managed-identity)
+* [grant access "App Configuration Data Reader" role to the Managed Identity](#grant-access-app-configuration-data-reader-role-to-the-managed-identity)
+* [get the AKS cluster OIDC issuer URL](#get-the-aks-cluster-oidc-issuer-url)
+* [install Azure App Configuration Kubernetes Provider to your AKS cluster using `helm`](#install-azure-app-configuration-kubernetes-provider-to-your-aks-cluster-using-helm)
+* [create a Federated credentials for the Managed Identity](#create-a-federated-credentials-for-the-managed-identity)
+* [create another Azure App Configuration for Service account credential](#create-another-azure-app-configuration-for-service-account-credential)
+* [create AZURE-CLIENT-ID, AZURE-CLIENT-SECRET, AZURE-TENANT-ID secret in the key vault](#create-azure-client-id-azure-client-secret-azure-tenant-id-secret-in-the-key-vault)
+* [create a key value and key vault reference in the other App Configuration for service account credential](#create-a-key-value-and-key-vault-reference-in-the-other-app-configuration-for-service-account-credential)
+* [create an AzureAppConfigurationProvider resource](#create-an-azureappconfigurationprovider-resource)
+* [deploy the application to the AKS cluster using AzureAppConfigurationProvider](#deploy-the-application-to-the-aks-cluster-using-azureappconfigurationprovider)
+* [create a service for the application](#create-a-service-for-the-application)
+* [delete the resource group](#delete-the-resource-group)
+
+## How to run java spring boot application using key vault reference in Azure AKS using WorkloadIdentity
+* [create a resource group](#create-a-resource-group)
+* [create an Azure Key Vault](#create-an-azure-key-vault)
+* [get the Object id of yourself](#get-the-object-id-of-yourself)
+* [grant access "Key Vault Administrator" role to the Key Vault](#grant-access-key-vault-administrator-role-to-the-key-vault)
+* [create a secret in the Key Vault](#create-a-secret-in-the-key-vault)
+* [create an Azure App Configuration](#create-an-azure-app-configuration)
+* [create a key value in the App Configuration](#create-a-key-value-in-the-app-configuration)
+* [create a key vault reference in the App Configuration](#create-a-key-vault-reference-in-the-app-configuration)
+* [create container registry](#create-container-registry)
+* [login to the container registry](#login-to-the-container-registry)
+* [build the project using Maven](#build-the-project-using-maven)
+* [create a Docker image](#create-a-docker-image)
+* [push the Docker image](#push-the-docker-image)
+* [create AKS cluster](#create-aks-cluster)
+* [get access credentials for your AKS cluster](#get-access-credentials-for-your-aks-cluster)
+* [create a Managed Identity](#create-a-managed-identity)
+* [grant access "Key Vault Secrets User" role to the Managed Identity](#grant-access-key-vault-secrets-user-role-to-the-managed-identity)
+* [grant access "App Configuration Data Reader" role to the Managed Identity](#grant-access-app-configuration-data-reader-role-to-the-managed-identity)
+* [create a Kubernetes Service Account](#create-a-kubernetes-service-account)
+* [deploy the application to the AKS cluster using WorkloadIdentity](#deploy-the-application-to-the-aks-cluster-using-workloadidentity)
+* [create a service for the application](#create-a-service-for-the-application)
+* [delete the resource group](#delete-the-resource-group)
 
 
 ### Create a Resource Group
