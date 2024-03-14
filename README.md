@@ -4,10 +4,10 @@ This sample demonstrates how to use Azure App Configuration key vault reference 
 access them in your application through Azure App Configuration.
 
 # In this article
-* [prerequisites](#prerequisites)
+* [Prerequisites](#prerequisites)
 * [Quickstart](#quickstart)
 * [How to run java spring boot application using key vault reference in your local machine.](./run-on-local.md#use-key-vault-references-in-a-java-spring-app)
-* [How to run java spring boot application using key vault reference in Azure AKS using WorkloadIdentity.](./run-on-aks-using-workload-identity.md#integrate-aks-with-azure-key-vault-and-azure-app-configuration-using-workload-identity)
+* [How to run java spring boot application using key vault reference in Azure AKS using WorkloadIdentity.](./run-on-aks-using-workload-identity.md#integrate-aks-with-azure-key-vault-and-azure-app-configuration-using-workload-identity) (Recommended)
 * [How to run java spring boot application using key vault reference in Azure AKS using AppConfigurationProvider.](./run-on-aks-using-azureappconfigurationprovider.md#integrate-aks-with-azure-app-configuration-using-azureappconfigurationprovider)
 
 ## Prerequisites
