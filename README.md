@@ -5,6 +5,7 @@ access them in your application through Azure App Configuration.
 
 # In this article
 * [Prerequisites](#prerequisites)
+* [Key name in App configuration](#key-name-in-app-configuration)
 * [Quickstart](#quickstart)
 * [How to run java spring boot application using key vault reference in your local machine.](./run-on-local.md#use-key-vault-references-in-a-java-spring-app)
 * [How to run java spring boot application using key vault reference in Azure AKS using WorkloadIdentity.](./run-on-aks-using-workload-identity.md#integrate-aks-with-azure-key-vault-and-azure-app-configuration-using-workload-identity) (Recommended)
@@ -17,6 +18,17 @@ access them in your application through Azure App Configuration.
 * Maven 3.0 and above. If you don't have Maven, install [Maven](https://maven.apache.org/download.cgi).
 * Docker. If you don't have Docker, install [Docker](https://www.docker.com/products/docker-desktop).
 * Helm. If you don't have Helm, install [Helm](https://helm.sh/docs/intro/install/).
+
+
+## Key name in App configuration
+When using azure app configuration with java spring boot application, the key name in the app configuration should be
+prefixed with `/application/` if you are not using `key-filter` in the `bootstrap.properties` file. If you are using
+`key-filter` in the `bootstrap.properties` file, then the key name in the app configuration should be prefixed with the
+value of `key-filter` in the `bootstrap.properties` file.
+
+In this project, we have used `/demo/` as the prefix in the `bootstrap.properties` file. So, the key name in the app
+configuration should be prefixed with `/demo/`. For example, the `APP_SECRET` and `APP_CONFIG` in the `application.properties`
+file should be stored in the app configuration with the key name `/demo/APP_SECRET` and `/demo/APP_CONFIG` respectively.
 
 
 ## Quickstart
